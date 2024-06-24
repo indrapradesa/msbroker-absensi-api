@@ -39,22 +39,13 @@ class AbsensiController {
         });
 
         this.channel.consume(queueName, async (msg) => {
-            console.log(" [x] %s: '%s'", msg.fields.routingKey, msg.content.toString());
+            // console.log(" [x] %s: '%s'", msg.fields.routingKey, msg.content.toString());
             const messageContent = msg.content.toString();
             let data;
             data = JSON.parse(messageContent);
             const { branch_company_id, nip, tgl, jam, status } = { ...data.data };
-            // const dataDb = {
-            //     branch_company_id: branch_company_id,
-            //     nip : nip,
-            //     tgl: tgl,
-            //     jam : jam,
-            //     status : status,
-            // };
             
             try {
-
-
                 const dataDb = [
                     [branch_company_id,
                     nip,
@@ -63,20 +54,16 @@ class AbsensiController {
                     status]
                 ];
 
-                const insertDb = await this.pool_hr.query(this.queryAbsensi, [dataDb]);
-                console.log(insertDb)
-                // if (insertDb.serverStatus === 2){
-                    const result = await this.sendSpreadsheet(
-                        nip,
-                        tgl,
-                        jam,
-                        status,
-                      );
+                await this.pool_hr.query(this.queryAbsensi, [dataDb]);
+                
+                const result = await this.sendSpreadsheet(
+                    nip,
+                    tgl,
+                    jam,
+                    status,
+                );
     
-                    return result;
-                // }
-
-                // return insertDb;
+                return result;
             } catch (error) {
                 throw new Error(
                   "Could not send message to endpoint: " + error.message
