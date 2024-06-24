@@ -3,6 +3,7 @@ import config from '../config/index.js';
 import axios from 'axios';
 import { queryAbsensi } from '../query/absensiQuery.js';
 import { pool_hr } from '../db/db.js';
+import moment from 'moment';
 
 class AbsensiController {
     channel;
@@ -44,13 +45,13 @@ class AbsensiController {
             let data;
             data = JSON.parse(messageContent);
             const { branch_company_id, nip, tgl, jam, status } = { ...data.data };
-            
+            let jamNew = moment(jam, "HH:mm:ss").subtract(1, 'hours').format("HH:mm:ss");
             try {
                 const dataDb = [
                     [branch_company_id,
                     nip,
                     tgl,
-                    jam,
+                    jamNew,
                     status]
                 ];
 
@@ -59,7 +60,7 @@ class AbsensiController {
                 const result = await this.sendSpreadsheet(
                     nip,
                     tgl,
-                    jam,
+                    jamNew,
                     status,
                 );
     
@@ -78,7 +79,7 @@ class AbsensiController {
     async sendSpreadsheet(
         nip,
         tgl,
-        jam,
+        jamNew,
         status) {
             const headers = {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -86,7 +87,7 @@ class AbsensiController {
               const data = new URLSearchParams({
                 nip,
                 tgl,
-                jam,
+                jamNew,
                 status,
               }).toString();
             
